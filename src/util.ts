@@ -1,4 +1,5 @@
 import configProps from './config-props';
+import type { JWPlayerConfig } from './jwplayer';
 
 let idIndex = -1;
 
@@ -20,20 +21,33 @@ export function createPlayerLoadPromise(url: string): Promise<void> {
 }
 
 export function loadPlayer(url?: string): Promise<void> {
-  if (!window.jwplayer && !url) throw new Error('jwplayer-react requires either a library prop, or a library script');
-  if (window.jwplayer) return Promise.resolve();
+  if (!window.jwplayer && !url) {
+    throw new Error(
+      'jwplayer-react requires either a library prop, or a library script',
+    );
+  }
+
+  if (window.jwplayer) {
+    return Promise.resolve();
+  }
 
   return createPlayerLoadPromise(url);
 }
 
-export function generateConfig(props: Record<string, any>): Record<string, any> {
+export function generateConfig(
+  props: Record<string, any>,
+): Partial<JWPlayerConfig> & { isReactComponent: boolean } {
   const config: Record<string, any> = {};
 
   Object.keys(props).forEach((key) => {
     if (configProps.has(key)) config[key] = props[key];
   });
 
-  return { ...props.config, ...config, isReactComponent: true };
+  return {
+    ...(props.config as Partial<JWPlayerConfig>),
+    ...config,
+    isReactComponent: true,
+  };
 }
 
 export function getHandlerName(prop: string, regex: string): string {
@@ -42,4 +56,3 @@ export function getHandlerName(prop: string, regex: string): string {
   // lowercase the first letter of the match and return
   return match[1].charAt(0).toLowerCase() + match[1].slice(1);
 }
-
