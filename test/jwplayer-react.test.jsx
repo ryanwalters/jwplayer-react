@@ -81,14 +81,10 @@ describe('setup', () => {
 
   it('Errors with no library and falsey window.jwplayer', async () => {
     window.jwplayer = null;
-    const _consoleError = console.error;
-    const errorSpy = vi.fn();
-    console.error = errorSpy;
 
     // This should cause an error in componentDidMount
     const component = <JWPlayer />;
     const ref = React.createRef();
-    let errorCaught = null;
 
     // Add a callback to catch the error
     const errorComponent = React.cloneElement(component, {
@@ -101,28 +97,11 @@ describe('setup', () => {
     // Render will trigger componentDidMount which will throw
     render(errorComponent);
 
-    // Wait and catch the async error
-    try {
-      await new Promise((resolve, reject) => {
-        setTimeout(async () => {
-          if (ref.current && ref.current.player === null) {
-            resolve();
-          } else {
-            // The component should not have a player
-            resolve();
-          }
-        }, 50);
-      });
-    } catch (error) {
-      errorCaught = error;
-    }
-
     // Verify the component exists but didn't mount successfully
     if (ref.current) {
       expect(ref.current.player).toBeNull();
     }
 
-    console.error = _consoleError;
     expectedInstance++; // Account for the created instance
 
     // Clean up any dangling promises
