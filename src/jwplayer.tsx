@@ -50,7 +50,8 @@ function createOnEventHandler(
   return (name: string, optReturn?: any) => {
     Object.keys(props).forEach((prop) => {
       const onHandlerName = getHandlerName(prop, ON_REGEX);
-      if (onHandlerName === name) {
+      // Only process if we have a valid handler name
+      if (onHandlerName && onHandlerName === name) {
         props[prop](optReturn);
       }
       if (onHandlerName === ALL) {
