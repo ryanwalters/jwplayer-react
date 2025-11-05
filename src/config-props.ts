@@ -1,4 +1,4 @@
-export default new Set([
+export default new Set<string>([
   'hlsjsProgressive',
   '__abSendDomainToFeeds',
   '_abZoomThumbnail',
@@ -85,3 +85,4 @@ export default new Set([
   'doNotTrackCookies',
   'images',
 ]);
+

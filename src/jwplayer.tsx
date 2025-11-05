@@ -6,8 +6,45 @@ import {
   generateConfig, generateUniqueId, loadPlayer, getHandlerName,
 } from './util';
 
-function createOnEventHandler(props) {
-  return (name, optReturn) => {
+// Declare global jwplayer types
+declare global {
+  interface Window {
+    jwplayer: any;
+    jwDefaults?: Record<string, any>;
+  }
+}
+
+// Event handler types
+type EventHandler = (data?: any) => void;
+type AllEventHandler = (eventName: string, data?: any) => void;
+
+// Props type - supports onEventName, onceEventName, and onAll handlers
+export interface JWPlayerProps {
+  id?: string;
+  library?: string;
+  config?: Record<string, any>;
+  didMountCallback?: (args: { player: any; id: string }) => void;
+  willUnmountCallback?: (args: { player: any; id: string }) => void;
+  onAll?: AllEventHandler;
+  [key: string]: any; // Allow dynamic on* and once* handlers
+}
+
+// Ref type exposed through imperative handle
+export interface JWPlayerRef {
+  ref: React.RefObject<HTMLDivElement>;
+  player: any;
+  id: string;
+  didMountCallback?: (args: { player: any; id: string }) => void;
+  willUnmountCallback?: (args: { player: any; id: string }) => void;
+  onHandler: ((name: string, optReturn?: any) => void) | null;
+  componentDidMount: () => Promise<void>;
+  shouldComponentUpdate: (nextProps: JWPlayerProps) => boolean;
+  updateOnEventListener: (nextProps: JWPlayerProps) => void;
+  didOnEventsChange: (nextProps: JWPlayerProps) => boolean;
+}
+
+function createOnEventHandler(props: JWPlayerProps): (name: string, optReturn?: any) => void {
+  return (name: string, optReturn?: any) => {
     Object.keys(props).forEach((prop) => {
       const onHandlerName = getHandlerName(prop, ON_REGEX);
       if (onHandlerName === name) {
@@ -20,27 +57,27 @@ function createOnEventHandler(props) {
   };
 }
 
-const JWPlayer = React.forwardRef((props, forwardedRef) => {
-  const internalRef = useRef(null);
+const JWPlayer = React.forwardRef<JWPlayerRef, JWPlayerProps>((props, forwardedRef) => {
+  const internalRef = useRef<HTMLDivElement>(null);
   const ref = forwardedRef || internalRef;
-  const playerRef = useRef(null);
-  const onHandlerRef = useRef(null);
-  const propsRef = useRef(props);
-  const idRef = useRef(props.id || generateUniqueId());
-  const mountedRef = useRef(false);
+  const playerRef = useRef<any>(null);
+  const onHandlerRef = useRef<((name: string, optReturn?: any) => void) | null>(null);
+  const propsRef = useRef<JWPlayerProps>(props);
+  const idRef = useRef<string>(props.id || generateUniqueId());
+  const mountedRef = useRef<boolean>(false);
 
   // Update props ref for closure access
   propsRef.current = props;
 
   const config = useMemo(() => generateConfig(props), [props]);
 
-  const createPlayer = () => {
+  const createPlayer = (): any => {
     const setupConfig = { ...window.jwDefaults, ...config };
-    const view = ref.current;
-    return window.jwplayer(view.id).setup(setupConfig);
+    const view = (ref as React.RefObject<HTMLDivElement>).current;
+    return window.jwplayer(view!.id).setup(setupConfig);
   };
 
-  const createEventListeners = () => {
+  const createEventListeners = (): void => {
     Object.keys(propsRef.current).forEach((prop) => {
       const onceHandlerName = getHandlerName(prop, ONCE_REGEX);
       if (onceHandlerName) {
@@ -53,8 +90,8 @@ const JWPlayer = React.forwardRef((props, forwardedRef) => {
     playerRef.current.on(ALL, onHandlerRef.current);
   };
 
-  const didOnEventsChange = (nextProps) => {
-    const onEventFilter = (prop) => prop.match(ON_REGEX);
+  const didOnEventsChange = (nextProps: JWPlayerProps): boolean => {
+    const onEventFilter = (prop: string): boolean => prop.match(ON_REGEX) !== null;
     const currEvents = Object.keys(propsRef.current).filter(onEventFilter).sort();
     const nextEvents = Object.keys(nextProps).filter(onEventFilter).sort();
 
@@ -68,7 +105,7 @@ const JWPlayer = React.forwardRef((props, forwardedRef) => {
     return newEvents;
   };
 
-  const updateOnEventListener = (nextProps) => {
+  const updateOnEventListener = (nextProps: JWPlayerProps): void => {
     if (onHandlerRef.current) {
       playerRef.current.off(ALL, onHandlerRef.current);
     }
@@ -77,7 +114,7 @@ const JWPlayer = React.forwardRef((props, forwardedRef) => {
     playerRef.current.on(ALL, onHandlerRef.current);
   };
 
-  const shouldComponentUpdate = (nextProps) => {
+  const shouldComponentUpdate = (nextProps: JWPlayerProps): boolean => {
     if (!playerRef.current) {
       return false;
     }
@@ -90,7 +127,7 @@ const JWPlayer = React.forwardRef((props, forwardedRef) => {
     return true;
   };
 
-  const componentDidMount = async () => {
+  const componentDidMount = async (): Promise<void> => {
     await loadPlayer(props.library);
     playerRef.current = createPlayer();
     createEventListeners();
@@ -102,14 +139,14 @@ const JWPlayer = React.forwardRef((props, forwardedRef) => {
 
   // Expose instance methods for tests
   useImperativeHandle(ref, () => ({
-    get ref() { return ref; },
+    get ref() { return ref as React.RefObject<HTMLDivElement>; },
     get player() { return playerRef.current; },
-    set player(value) { playerRef.current = value; },
+    set player(value: any) { playerRef.current = value; },
     get id() { return idRef.current; },
     get didMountCallback() { return props.didMountCallback; },
     get willUnmountCallback() { return props.willUnmountCallback; },
     get onHandler() { return onHandlerRef.current; },
-    set onHandler(value) { onHandlerRef.current = value; },
+    set onHandler(value: ((name: string, optReturn?: any) => void) | null) { onHandlerRef.current = value; },
     componentDidMount,
     shouldComponentUpdate,
     updateOnEventListener,
@@ -154,3 +191,4 @@ const JWPlayer = React.forwardRef((props, forwardedRef) => {
 });
 
 export default JWPlayer;
+

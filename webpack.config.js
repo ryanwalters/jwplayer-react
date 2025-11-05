@@ -2,7 +2,7 @@ var path = require('path');
 
 module.exports = {
     mode: 'production',
-    entry: './src/jwplayer.jsx',
+    entry: './src/jwplayer.tsx',
     output: {
         path: path.resolve('lib'),
         filename: 'jwplayer-react.js',
@@ -11,10 +11,13 @@ module.exports = {
     module: {
         rules: [
             {
-                test: /\.jsx?$/,
+                test: /\.(jsx?|tsx?)$/,
                 exclude: /(node_modules)/,
                 use: 'babel-loader'
             }
         ]
+    },
+    resolve: {
+        extensions: ['.ts', '.tsx', '.js', '.jsx']
     }
 }
