@@ -4,20 +4,19 @@
   "description": "A react component that creates an instance of JW Player",
   "license": "MIT",
   "author": "Ryan Walters",
-  "homepage": "https://github.com/jwplayer/jwplayer-react#readme",
+  "homepage": "https://github.com/ryanwalters/jwplayer-react#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jwplayer/jwplayer-react.git"
+    "url": "git+https://github.com/ryanwalters/jwplayer-react.git"
   },
   "bugs": {
-    "url": "https://github.com/jwplayer/jwplayer-react/issues"
+    "url": "https://github.com/ryanwalters/jwplayer-react/issues"
   },
   "main": "./lib/jwplayer-react.js",
   "types": "./lib/jwplayer-react.d.ts",
   "scripts": {
     "build": "tsup",
-    "ci": "npm ci; npm run build; npm run test; npm run lint",
-    "lint": "eslint ./src/**/* --fix",
+    "ci": "npm ci; npm run build; npm run test",
     "test": "vitest run --coverage"
   },
   "peerDependencies": {
@@ -37,7 +36,11 @@
     "eslint-plugin-import": "2.32.0",
     "eslint-plugin-jsx-a11y": "6.10.2",
     "eslint-plugin-react": "7.37.5",
+    "husky": "9.1.7",
     "jsdom": "27.1.0",
+    "lint-staged": "16.2.6",
+    "prettier": "3.6.2",
+    "prettier-plugin-organize-imports": "4.3.0",
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "react-test-renderer": "19.2.0",
@@ -50,5 +53,14 @@
     "jwplayer",
     "player",
     "react"
-  ]
+  ],
+  "prettier": {
+    "singleQuote": true,
+    "plugins": [
+      "prettier-plugin-organize-imports"
+    ]
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,scss,md}": "prettier --write"
+  }
 }
