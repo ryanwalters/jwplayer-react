@@ -1,12 +1,14 @@
+import { vi } from 'vitest';
+
 export const players = {}
 
 const createMockAPI = (id) => {
     const api = () => {};
-    const on = jest.fn(() => api);
-    const once = jest.fn(() => api);
-    const off = jest.fn(() => api);
-    const remove = jest.fn(() => api);
-    const setup = jest.fn(() => api);
+    const on = vi.fn(() => api);
+    const once = vi.fn(() => api);
+    const off = vi.fn(() => api);
+    const remove = vi.fn(() => api);
+    const setup = vi.fn(() => api);
 
     Object.assign(api, { on, once, off, remove, setup });
     players[id] = api;
