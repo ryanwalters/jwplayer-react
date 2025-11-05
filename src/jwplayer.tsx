@@ -31,7 +31,7 @@ export interface JWPlayerProps {
 
 // Ref type exposed through imperative handle
 export interface JWPlayerRef {
-  ref: React.RefObject<HTMLDivElement>;
+  ref: React.RefObject<HTMLDivElement | null>;
   player: any;
   id: string;
   didMountCallback?: (args: { player: any; id: string }) => void;
@@ -59,7 +59,6 @@ function createOnEventHandler(props: JWPlayerProps): (name: string, optReturn?: 
 
 const JWPlayer = React.forwardRef<JWPlayerRef, JWPlayerProps>((props, forwardedRef) => {
   const internalRef = useRef<HTMLDivElement>(null);
-  const ref = forwardedRef || internalRef;
   const playerRef = useRef<any>(null);
   const onHandlerRef = useRef<((name: string, optReturn?: any) => void) | null>(null);
   const propsRef = useRef<JWPlayerProps>(props);
@@ -73,7 +72,7 @@ const JWPlayer = React.forwardRef<JWPlayerRef, JWPlayerProps>((props, forwardedR
 
   const createPlayer = (): any => {
     const setupConfig = { ...window.jwDefaults, ...config };
-    const view = (ref as React.RefObject<HTMLDivElement>).current;
+    const view = internalRef.current;
     return window.jwplayer(view!.id).setup(setupConfig);
   };
 
@@ -138,8 +137,8 @@ const JWPlayer = React.forwardRef<JWPlayerRef, JWPlayerProps>((props, forwardedR
   };
 
   // Expose instance methods for tests
-  useImperativeHandle(ref, () => ({
-    get ref() { return ref as React.RefObject<HTMLDivElement>; },
+  useImperativeHandle(forwardedRef, () => ({
+    get ref() { return internalRef; },
     get player() { return playerRef.current; },
     set player(value: any) { playerRef.current = value; },
     get id() { return idRef.current; },
@@ -187,7 +186,7 @@ const JWPlayer = React.forwardRef<JWPlayerRef, JWPlayerProps>((props, forwardedR
     propsRef.current = props;
   }, [props]);
 
-  return <div id={idRef.current} ref={ref} />;
+  return <div id={idRef.current} ref={internalRef} />;
 });
 
 export default JWPlayer;

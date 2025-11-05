@@ -3,13 +3,7 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [
-    react({
-      babel: {
-        babelrc: false,
-        configFile: false,
-        presets: ['@babel/preset-react'],
-      },
-    }),
+    react(),
   ],
   resolve: {
     extensions: ['.js', '.jsx', '.ts', '.tsx'],
