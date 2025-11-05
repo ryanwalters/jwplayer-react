@@ -14,6 +14,10 @@
   },
   "main": "./lib/jwplayer-react.js",
   "types": "./lib/jwplayer-react.d.ts",
+  "files": [
+    "lib/jwplayer-react.d.ts",
+    "lib/jwplayer-react.js"
+  ],
   "publishConfig": {
     "access": "public"
   },
