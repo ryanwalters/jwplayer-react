@@ -1,0 +1,16 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: monthly
+    target-branch: dev
+    groups:
+      dependencies-non-major:
+        update-types:
+          - minor
+          - patch
+      dev-dependencies-non-major:
+        update-types:
+          - minor
+          - patch
